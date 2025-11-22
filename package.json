@@ -1,0 +1,22 @@
+{
+  "name": "report-writer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered research report writing application",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "test:integ": "pnpm --filter \"./tests/integration\" test",
+    "test:e2e": "pnpm --filter \"./tests/e2e\" test",
+    "test:ci": "pnpm run lint && pnpm run test && pnpm run test:integ && pnpm run test:e2e"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
