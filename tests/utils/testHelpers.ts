@@ -1,37 +1,19 @@
 /**
- * Common Test Utilities and Helpers
+ * Common Test Utilities
+ * 
+ * Shared helper functions for all test types (unit, integration, E2E).
+ * Includes matchers, assertions, and convenience utilities.
  */
 
-import { afterEach, beforeEach } from 'vitest';
-
 /**
- * Common test setup
- * Can be used in beforeEach hooks
- */
-export async function setupTest(): Promise<void> {
-  // Common setup logic
-}
-
-/**
- * Common test teardown
- * Can be used in afterEach hooks
- */
-export async function teardownTest(): Promise<void> {
-  // Common cleanup logic
-}
-
-/**
- * Wait for a condition to be true or timeout
+ * Waits for a condition to be true, polling at intervals.
+ * Useful for async operations in tests.
  */
 export async function waitFor(
   condition: () => boolean | Promise<boolean>,
-  options: {
-    timeout?: number;
-    interval?: number;
-    message?: string;
-  } = {}
+  options: { timeout?: number; interval?: number } = {}
 ): Promise<void> {
-  const { timeout = 5000, interval = 100, message = 'Condition not met' } = options;
+  const { timeout = 5000, interval = 100 } = options;
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
@@ -41,70 +23,61 @@ export async function waitFor(
     await sleep(interval);
   }
 
-  throw new Error(message);
+  throw new Error(`Timeout waiting for condition after ${timeout}ms`);
 }
 
 /**
- * Sleep for specified milliseconds
+ * Sleep utility for tests.
  */
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
- * Create a mock timestamp for consistent testing
+ * Generates a unique test ID for isolation.
  */
-export function mockTimestamp(offset: number = 0): number {
-  return new Date('2024-01-01T00:00:00.000Z').getTime() + offset;
+export function generateTestId(prefix: string = 'test'): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 }
 
 /**
- * Assert that a promise rejects with a specific error
+ * Fake LLM response generator for deterministic testing.
+ * Returns predictable responses based on input prompts.
  */
-export async function expectError(
-  promise: Promise<unknown>,
-  expectedMessage?: string | RegExp
-): Promise<void> {
-  try {
-    await promise;
-    throw new Error('Expected promise to reject but it resolved');
-  } catch (error) {
-    if (expectedMessage) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (typeof expectedMessage === 'string') {
-        if (!message.includes(expectedMessage)) {
-          throw new Error(
-            `Expected error message to include "${expectedMessage}" but got "${message}"`
-          );
-        }
-      } else if (!expectedMessage.test(message)) {
-        throw new Error(
-          `Expected error message to match ${expectedMessage} but got "${message}"`
-        );
+export function createFakeLLM() {
+  return {
+    generate: async (prompt: string): Promise<string> => {
+      // Deterministic fake responses for testing
+      if (prompt.includes('summary')) {
+        return 'This is a fake summary response for testing.';
       }
-    }
+      if (prompt.includes('report')) {
+        return 'This is a fake report generation response for testing.';
+      }
+      return 'This is a fake LLM response for testing.';
+    },
+  };
+}
+
+/**
+ * Mock clock for time-sensitive tests.
+ */
+export class MockClock {
+  private currentTime: number;
+
+  constructor(initialTime: Date = new Date()) {
+    this.currentTime = initialTime.getTime();
   }
-}
 
-/**
- * Create a spy/mock function that tracks calls
- */
-export function createSpy<T extends (...args: any[]) => any>(
-  implementation?: T
-): T & { calls: any[][] } {
-  const calls: any[][] = [];
-  const spy = ((...args: any[]) => {
-    calls.push(args);
-    return implementation?.(...args);
-  }) as T & { calls: any[][] };
-  spy.calls = calls;
-  return spy;
-}
+  now(): Date {
+    return new Date(this.currentTime);
+  }
 
-/**
- * Utility to use test setup/teardown in tests
- */
-export function useTestSetup(): void {
-  beforeEach(setupTest);
-  afterEach(teardownTest);
+  advance(ms: number): void {
+    this.currentTime += ms;
+  }
+
+  tick(ms: number): void {
+    this.advance(ms);
+  }
 }

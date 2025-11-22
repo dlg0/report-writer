@@ -1,6 +1,19 @@
-# End-to-End Tests
+# End-to-End (E2E) Tests
 
-E2E tests verify complete user workflows in a real browser environment using Playwright.
+E2E tests verify the complete application flow from the user's perspective using Playwright. These tests run in real browsers and test the entire stack.
+
+## Structure
+
+```
+tests/e2e/
+├── README.md              # This file
+├── fixtures/
+│   ├── auth.ts           # Authentication fixtures
+│   └── projects.ts       # Project fixtures
+├── auth/                 # Authentication flow tests
+├── projects/             # Project management tests
+└── reports/              # Report generation tests
+```
 
 ## Running E2E Tests
 
@@ -11,99 +24,164 @@ npm run test:e2e
 # Run E2E tests in headed mode (see browser)
 npx playwright test --headed
 
-# Run specific test file
-npx playwright test tests/e2e/auth.spec.ts
-
-# Run in debug mode
+# Run E2E tests in debug mode
 npx playwright test --debug
 
+# Run specific test file
+npx playwright test tests/e2e/auth/login.spec.ts
+
+# Run tests in specific browser
+npx playwright test --project=chromium
+
 # Show test report
-npx playwright show-report test-results/html
+npx playwright show-report playwright-results/html
 ```
 
-## Test Approach
+## Writing E2E Tests
 
-E2E tests simulate real user interactions:
-- **Full browser automation**: Real Chrome, Firefox, Safari
-- **Page Object Model**: Encapsulate page interactions in reusable objects
-- **Fixtures**: Reusable setup for auth, data, etc.
-- **Visual testing**: Screenshot comparison for UI regression
-- **Network mocking**: Intercept and mock API calls when needed
+E2E tests should:
 
-## Structure
+1. **Use page object models** for reusable UI interactions
+2. **Use fixtures** for authentication and test data
+3. **Test complete user workflows**, not individual functions
+4. **Be independent** - each test should work in isolation
+5. **Use data-testid attributes** for stable selectors
 
-- `tests/e2e/` - E2E test spec files (`*.spec.ts`)
-- `tests/e2e/fixtures/` - Reusable test fixtures
-- `tests/e2e/pages/` - Page Object Models (to be added)
-- `playwright.config.ts` - Playwright configuration
-
-## Requirements for AI Agents
-
-All E2E tests are:
-- **Non-interactive**: Fully automated, no manual steps
-- **Deterministic**: Use fixtures and mocks for consistent state
-- **Clear exit codes**: 0 for success, non-zero for failure
-- **JSON output**: Results available in `test-results/e2e-results.json`
-- **CI-ready**: Headless by default, screenshots/videos on failure
-
-## Example Test
+### Example E2E Test
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import { authenticatedUser } from './fixtures/auth';
+import { test, expect } from '../fixtures/projects';
 
 test.describe('Project Management', () => {
-  test.use(authenticatedUser);
+  test('user can create a new project', async ({ authenticatedPage }) => {
+    await authenticatedPage.goto('/projects');
+    
+    await authenticatedPage.click('[data-testid="create-project-button"]');
+    await authenticatedPage.fill('[data-testid="project-name"]', 'My New Project');
+    await authenticatedPage.fill('[data-testid="project-description"]', 'Test project description');
+    await authenticatedPage.click('[data-testid="submit-project"]');
+    
+    await expect(authenticatedPage.locator('[data-testid="project-list"]'))
+      .toContainText('My New Project');
+  });
 
-  test('should create a new project', async ({ page }) => {
-    await page.goto('/projects');
-    await page.click('button:has-text("New Project")');
+  test('user can view project details', async ({ authenticatedPage, testProject }) => {
+    await authenticatedPage.goto(`/projects/${testProject.id}`);
     
-    await page.fill('input[name="name"]', 'Test Project');
-    await page.fill('textarea[name="description"]', 'Test Description');
-    await page.click('button:has-text("Create")');
-    
-    await expect(page.locator('h1')).toContainText('Test Project');
+    await expect(authenticatedPage.locator('[data-testid="project-name"]'))
+      .toContainText(testProject.name);
   });
 });
 ```
 
 ## Fixtures
 
-Fixtures provide reusable setup and state:
+Fixtures provide pre-configured test environments:
 
-- **auth.ts**: Authentication fixtures (logged in/out users, different roles)
-- **projects.ts**: Project data fixtures (empty state, with projects, etc.)
-- Custom fixtures can be added for common test scenarios
+### Authentication Fixture (`tests/e2e/fixtures/auth.ts`)
 
-## Best Practices
+```typescript
+import { test, expect } from '../fixtures/auth';
 
-1. **Use data-testid**: Add `data-testid` attributes to important elements
-2. **Wait for navigation**: Use `waitForURL` after navigation actions
-3. **Avoid brittle selectors**: Prefer semantic selectors over CSS classes
-4. **Test user flows, not implementation**: Focus on what users do
-5. **Keep tests independent**: Each test should set up its own state
-6. **Use fixtures for common setup**: Don't repeat auth/data setup
-7. **Clean up after tests**: Use fixtures to ensure clean state
+test('authenticated feature', async ({ authenticatedPage, testUser }) => {
+  // authenticatedPage is already logged in as testUser
+  await authenticatedPage.goto('/dashboard');
+});
+```
+
+### Project Fixture (`tests/e2e/fixtures/projects.ts`)
+
+```typescript
+import { test, expect } from '../fixtures/projects';
+
+test('project feature', async ({ authenticatedPage, testProject }) => {
+  // testProject is already created in the database
+  await authenticatedPage.goto(`/projects/${testProject.id}`);
+});
+```
+
+## Selectors
+
+**Prefer data-testid attributes** for stable selectors:
+
+```html
+<!-- Good -->
+<button data-testid="submit-button">Submit</button>
+
+<!-- Avoid (brittle) -->
+<button class="btn btn-primary">Submit</button>
+```
+
+```typescript
+// Good
+await page.click('[data-testid="submit-button"]');
+
+// Avoid
+await page.click('.btn.btn-primary');
+```
+
+## Configuration
+
+Playwright configuration is in `playwright.config.ts`:
+
+- Tests run in **chromium, firefox, webkit** by default
+- **Retries**: 2 retries on CI, 0 locally
+- **Timeout**: 30 seconds per test
+- **Screenshots/Videos**: On failure only
+- **Base URL**: http://localhost:3000 (configurable via `E2E_BASE_URL`)
+
+## CI/CD
+
+E2E tests run in CI via `npm run test:ci`. They:
+
+- Run headlessly in all configured browsers
+- Retry failed tests up to 2 times
+- Generate JSON and HTML reports
+- Capture screenshots/videos on failure
 
 ## Debugging
 
+### View test in browser
 ```bash
-# Run with browser visible
-npx playwright test --headed
-
-# Run with step-by-step debugger
-npx playwright test --debug
-
-# Generate test code from browser actions
-npx playwright codegen http://localhost:3000
+npx playwright test --headed --project=chromium
 ```
 
-## CI Configuration
+### Step through test
+```bash
+npx playwright test --debug
+```
 
-E2E tests are configured to run in CI:
-- Headless mode (no GUI)
-- Retry failed tests (2 retries)
-- Single worker (sequential execution)
-- Save screenshots and videos on failure
-- JSON report for programmatic parsing
+### View trace after failure
+```bash
+npx playwright show-trace playwright-results/trace.zip
+```
+
+### Screenshots
+Failed tests automatically capture screenshots in `playwright-results/`
+
+## Best Practices
+
+1. **Keep tests independent** - don't rely on test execution order
+2. **Use meaningful test data** - helps with debugging
+3. **Test happy paths first** - then edge cases
+4. **One assertion concept per test** - easier to diagnose failures
+5. **Use fixtures for setup/teardown** - cleaner test code
+6. **Avoid hardcoded waits** - use Playwright's auto-waiting
+7. **Tag tests appropriately** - for selective execution
+
+## Troubleshooting
+
+**Tests timing out?**
+- Check if app is running on expected port
+- Increase timeout in playwright.config.ts
+- Use `await page.waitForLoadState('networkidle')`
+
+**Flaky tests?**
+- Avoid `page.waitForTimeout()` - use specific waits
+- Check for race conditions
+- Ensure proper element visibility
+
+**Can't see what's happening?**
+- Run with `--headed` flag
+- Use `--debug` for step-by-step execution
+- Add `await page.pause()` to pause at specific point

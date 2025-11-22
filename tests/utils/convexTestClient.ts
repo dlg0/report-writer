@@ -1,53 +1,43 @@
 /**
- * Convex Test Client
+ * Convex Test Client Configuration
  * 
- * Provides isolated Convex backend instance for integration testing.
- * This is a stub - implement based on Convex testing documentation.
+ * Provides utilities for testing Convex backend functions in isolation.
+ * This stub will be expanded to include:
+ * - Mock Convex client initialization
+ * - Test database setup/teardown
+ * - Fake authentication tokens
+ * - Query/mutation test helpers
  */
 
 export interface ConvexTestClient {
-  run<T>(functionName: string, args?: Record<string, unknown>): Promise<T>;
-  clearDatabase(): Promise<void>;
-  seed(data: Record<string, unknown[]>): Promise<void>;
-  close(): Promise<void>;
-}
-
-class ConvexTestClientImpl implements ConvexTestClient {
-  async run<T>(functionName: string, args?: Record<string, unknown>): Promise<T> {
-    throw new Error(`ConvexTestClient.run not yet implemented: ${functionName}`);
-  }
-
-  async clearDatabase(): Promise<void> {
-    // TODO: Implement database clearing for test isolation
-  }
-
-  async seed(data: Record<string, unknown[]>): Promise<void> {
-    // TODO: Implement test data seeding
-  }
-
-  async close(): Promise<void> {
-    // TODO: Cleanup test client resources
-  }
-}
-
-export const convexTest = new ConvexTestClientImpl();
-
-/**
- * Setup Convex test client for integration tests
- * Call this in test setup (beforeAll/beforeEach)
- */
-export async function setupConvexTest(): Promise<ConvexTestClient> {
-  // TODO: Initialize Convex test environment
-  // - Start local Convex instance or use test deployment
-  // - Configure with fake LLM
-  // - Setup test database
-  return convexTest;
+  query: (name: string, args?: any) => Promise<any>;
+  mutation: (name: string, args?: any) => Promise<any>;
+  action: (name: string, args?: any) => Promise<any>;
 }
 
 /**
- * Teardown Convex test client
- * Call this in test teardown (afterAll/afterEach)
+ * Creates a test Convex client for integration testing.
+ * Currently a stub - implement with actual Convex test utilities.
  */
-export async function teardownConvexTest(): Promise<void> {
-  await convexTest.close();
+export function createTestClient(): ConvexTestClient {
+  // TODO: Implement actual Convex test client
+  throw new Error('Not implemented: createTestClient');
+}
+
+/**
+ * Seeds the test database with initial data.
+ * Use this in beforeEach/beforeAll hooks.
+ */
+export async function setupTestDatabase(): Promise<void> {
+  // TODO: Implement database setup
+  throw new Error('Not implemented: setupTestDatabase');
+}
+
+/**
+ * Cleans up test database after tests.
+ * Use this in afterEach/afterAll hooks.
+ */
+export async function teardownTestDatabase(): Promise<void> {
+  // TODO: Implement database teardown
+  throw new Error('Not implemented: teardownTestDatabase');
 }
