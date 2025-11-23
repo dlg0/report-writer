@@ -12,11 +12,12 @@
     "test:ci": "npm run lint && npm test && npm run test:integ && npm run test:e2e"
   },
   "devDependencies": {
-    "vitest": "^1.0.4",
-    "@vitest/ui": "^1.0.4",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.1.5",
     "@playwright/test": "^1.40.1",
-    "start-server-and-test": "^2.0.3"
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@vitest/ui": "^1.0.4",
+    "convex-test": "^0.0.40",
+    "start-server-and-test": "^2.0.3",
+    "vitest": "^1.0.4"
   }
 }

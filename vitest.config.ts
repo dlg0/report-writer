@@ -1,6 +1,14 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: [
+      { find: /^\.\.?\/_generated\/api$/, replacement: path.resolve(__dirname, 'convex/_generated/api.d.ts') },
+      { find: /^\.\.?\/_generated\/dataModel$/, replacement: path.resolve(__dirname, 'convex/_generated/dataModel.d.ts') },
+      { find: /^\.\.?\/_generated\/server$/, replacement: path.resolve(__dirname, 'convex/_generated/server.ts') },
+    ],
+  },
   test: {
     globals: true,
     environment: 'node',
