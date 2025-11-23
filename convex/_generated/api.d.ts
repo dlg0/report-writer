@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as auth from "../auth.js";
 import type * as features_agent from "../features/agent.js";
 import type * as features_locking from "../features/locking.js";
 import type * as features_versions from "../features/versions.js";
@@ -30,7 +29,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  auth: typeof auth;
   "features/agent": typeof features_agent;
   "features/locking": typeof features_locking;
   "features/versions": typeof features_versions;
