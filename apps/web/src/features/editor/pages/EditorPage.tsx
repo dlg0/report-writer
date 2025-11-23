@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../lib/convex';
 import type { Id } from 'convex/_generated/dataModel';
 import { SectionsList } from '../components/SectionsList';
@@ -18,6 +18,7 @@ import { CreateVersionButton } from '../../versions/components/CreateVersionButt
 import { useVersions } from '../../versions/hooks/useVersions';
 import { useVersionComparison } from '../../versions/hooks/useVersionComparison';
 import { ThreadsPanel } from '../../agentThreads';
+import { CommentsPanel } from '../../comments';
 
 export function EditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,7 @@ export function EditorPage() {
   const [activeSectionId, setActiveSectionId] = useState<Id<"sections"> | null>(null);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showAgentThreads, setShowAgentThreads] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [compareVersions, setCompareVersions] = useState<{
     versionA: Id<'reportVersions'>;
     versionB: Id<'reportVersions'>;
@@ -43,6 +45,7 @@ export function EditorPage() {
     compareVersions?.versionA ?? null,
     compareVersions?.versionB ?? null
   );
+  const createThread = useMutation(api.features.agent.createThread);
 
   const activeSection = sections?.find((s: any) => s._id === activeSectionId);
   
@@ -125,6 +128,12 @@ export function EditorPage() {
               className="px-4 py-2 border rounded-md hover:bg-gray-50"
             >
               {showAgentThreads ? 'Hide Threads' : '🤖 Agent Threads'}
+            </button>
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="px-4 py-2 border rounded-md hover:bg-gray-50"
+            >
+              {showComments ? 'Hide Comments' : '💬 Comments'}
             </button>
           </div>
         </div>
@@ -212,6 +221,25 @@ export function EditorPage() {
         {showAgentThreads && (
           <aside className="w-96 flex-shrink-0 border-l bg-white">
             <ThreadsPanel projectId={projectId} />
+          </aside>
+        )}
+
+        {showComments && (
+          <aside className="w-96 flex-shrink-0 border-l bg-white">
+            <CommentsPanel
+              projectId={projectId}
+              onCommentClick={(commentId) => {
+                console.log('Comment clicked:', commentId);
+              }}
+              onCreateThread={async (commentId) => {
+                await createThread({
+                  projectId,
+                  title: 'Agent thread from comment',
+                  anchorCommentId: commentId,
+                });
+                setShowAgentThreads(true);
+              }}
+            />
           </aside>
         )}
       </div>
