@@ -20,7 +20,7 @@ out/
 
 # Convex
 .convex/
-convex/_generated/
+# convex/_generated/ - now checked in for Vercel builds
 
 # Python
 __pycache__/

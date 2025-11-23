@@ -19,5 +19,8 @@
     "convex-test": "^0.0.40",
     "start-server-and-test": "^2.0.3",
     "vitest": "^1.0.4"
+  },
+  "dependencies": {
+    "convex": "^1.29.3"
   }
 }

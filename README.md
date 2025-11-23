@@ -97,6 +97,7 @@ pnpm test:e2e       # End-to-end tests
 - [Agent Threads](docs/agent-threads.md) - AI thread lifecycle and integration
 - [Testing Guide](docs/testing.md) - How to write and run tests
 - [Development Setup](docs/development-setup.md) - Detailed environment setup
+- [Deployment Guide](DEPLOY.md) - How to deploy to production
 - [Contributing](CONTRIBUTING.md) - How to contribute to this project
 - [Contributing for Agents](docs/contributing-for-agents.md) - Quick guide for AI coding tools
 

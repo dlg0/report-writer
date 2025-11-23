@@ -174,6 +174,63 @@ This project includes specialized documentation for LLM developers working with 
 
 **Note**: The non-full versions contain up-to-date URLs to the official documentation, making them the preferred choice for most development tasks.
 
+## Deployment Commands
+
+### Quick Deploy
+
+```bash
+# Deploy Convex backend
+npx convex deploy
+
+# Deploy to Daytona sandbox
+daytona sandbox create --name report-writer-sandbox --snapshot daytona-medium --auto-stop 0
+
+# Build and deploy frontend (example: Vercel)
+cd apps/web && pnpm build && vercel --prod
+```
+
+### Convex Commands
+
+```bash
+npx convex dev              # Start dev mode (auto-deploys on changes)
+npx convex deploy           # Deploy to production
+npx convex env set KEY val  # Set environment variable
+npx convex env list         # List environment variables
+npx convex dashboard        # Open web dashboard
+npx convex logs             # Stream logs
+npx convex data             # View database tables
+npx convex run <function>   # Execute a function
+```
+
+### Daytona Commands
+
+```bash
+daytona sandbox create --name <name> --snapshot daytona-medium  # Create sandbox
+daytona sandbox list                                             # List sandboxes
+daytona sandbox info <name>                                      # Get sandbox details
+daytona sandbox stop <name>                                      # Stop sandbox
+daytona sandbox start <name>                                     # Start sandbox
+daytona sandbox delete <name>                                    # Delete sandbox
+daytona snapshot list                                            # List snapshots
+```
+
+### Environment Variables
+
+**Convex** (set via `npx convex env set`):
+- `SANDBOX_URL` - URL of the Daytona sandbox API
+
+**Web Frontend** (build-time, prefix with `VITE_`):
+- `VITE_CONVEX_URL` - Convex deployment URL
+- `VITE_SANDBOX_URL` - Daytona sandbox URL
+
+**Sandbox** (set when creating sandbox):
+- `CONVEX_URL` - Convex deployment URL
+- `PORT` - Port to run FastAPI (default: 8000)
+
+### Full Deployment Guide
+
+See [DEPLOY.md](DEPLOY.md) for complete deployment instructions.
+
 ## Available Tools
 
 ### GitHub CLI (gh)
