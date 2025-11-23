@@ -17,6 +17,7 @@ interface BlockEditorProps {
   onSave: (blockId: Id<"blocks">, text: string) => void;
   onBlur: (blockId: Id<"blocks">, text: string) => void;
   saving?: boolean;
+  disabled?: boolean;
 }
 
 const blockTypeLabels: Record<string, string> = {
@@ -37,7 +38,7 @@ const blockTypeColors: Record<string, string> = {
   codeBlock: "bg-gray-100 text-gray-700",
 };
 
-export function BlockEditor({ block, onSave, onBlur, saving }: BlockEditorProps) {
+export function BlockEditor({ block, onSave, onBlur, saving, disabled = false }: BlockEditorProps) {
   const [text, setText] = useState(block.markdownText);
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -79,8 +80,9 @@ export function BlockEditor({ block, onSave, onBlur, saving }: BlockEditorProps)
     <div
       className={cn(
         "group relative border rounded-lg p-4 transition-all",
-        isFocused ? "border-primary shadow-md" : "border-border hover:border-primary/50",
-        saving && "opacity-50"
+        isFocused && !disabled ? "border-primary shadow-md" : "border-border hover:border-primary/50",
+        saving && "opacity-50",
+        disabled && "opacity-60 bg-gray-50"
       )}
     >
       <div className="flex items-start gap-2 mb-2">
@@ -100,10 +102,12 @@ export function BlockEditor({ block, onSave, onBlur, saving }: BlockEditorProps)
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
+        disabled={disabled}
         className={cn(
           "w-full resize-none bg-transparent border-none outline-none",
           "font-mono text-sm leading-relaxed",
-          block.blockType === 'codeBlock' && "font-mono bg-muted p-2 rounded"
+          block.blockType === 'codeBlock' && "font-mono bg-muted p-2 rounded",
+          disabled && "cursor-not-allowed"
         )}
         rows={1}
       />

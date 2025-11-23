@@ -9,6 +9,9 @@ import { MarkdownPreview } from '../components/MarkdownPreview';
 import { useSectionBlocks } from '../hooks/useSectionBlocks';
 import { useBlockEditor } from '../hooks/useBlockEditor';
 import { blocksToMarkdown } from '../utils/blocksToMarkdown';
+import { LockButton } from '../../locks/components/LockButton';
+import { LockIndicator } from '../../locks/components/LockIndicator';
+import { useLock } from '../../locks/hooks/useLock';
 
 export function EditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +27,14 @@ export function EditorPage() {
   const { debouncedSave, immediateSave, saving } = useBlockEditor(currentUser?._id ?? null);
 
   const activeSection = sections?.find((s: any) => s._id === activeSectionId);
+  
+  const sectionLock = useLock(
+    'section',
+    activeSectionId ?? '',
+    projectId
+  );
+  
+  const canEdit = !activeSectionId || sectionLock.lockStatus === 'acquired';
 
   const allBlocks = useQuery(api.tables.blocks.listByProject, projectId ? { projectId } : "skip");
 
@@ -84,11 +95,29 @@ export function EditorPage() {
         <main className="flex-1 overflow-y-auto p-6">
           {activeSectionId && activeSection ? (
             <div className="max-w-4xl mx-auto space-y-4">
-              <div className="mb-6">
+              <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">
                   {'#'.repeat(activeSection.headingLevel)} {activeSection.headingText}
                 </h2>
+                <div className="flex items-center gap-3">
+                  <LockIndicator
+                    resourceType="section"
+                    resourceId={activeSectionId}
+                    projectId={projectId}
+                  />
+                  <LockButton
+                    resourceType="section"
+                    resourceId={activeSectionId}
+                    projectId={projectId}
+                  />
+                </div>
               </div>
+              
+              {!canEdit && (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+                  This section is locked. You need to acquire the lock to edit.
+                </div>
+              )}
               
               {blocks.map((block) => (
                 <BlockEditor
@@ -97,6 +126,7 @@ export function EditorPage() {
                   onSave={handleBlockSave}
                   onBlur={handleBlockBlur}
                   saving={saving}
+                  disabled={!canEdit}
                 />
               ))}
 
